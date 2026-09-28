@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "custom": {
+      "type": "custom",
+      "baseUrl": "https://bandelbanget.xyz/v1",
+      "options": {
+        "apiKey": "sk-qwen-4eb9889f2aa7a7c7a10c4cd1644e1837e4bda5389cf322d1"
+      }
+    }
+  },
+  "enabled_providers": ["custom"],
+  "mcp": {
+    "agentation": {
+      "enabled": true,
+      "type": "local",
+      "command": "agentation-mcp",
+      "args": ["server"]
+    }
+  }
+}

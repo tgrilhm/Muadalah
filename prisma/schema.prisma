@@ -1,0 +1,431 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== ENUMS ====================
+
+enum SchoolLevel {
+  SMP
+  SMA
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  KEPALA_SEKOLAH
+  GURU
+}
+
+enum Gender {
+  LAKI_LAKI
+  PEREMPUAN
+}
+
+enum StudentStatus {
+  AKTIF
+  LULUS
+  PINDAH
+  KELUAR
+}
+
+enum AttendanceStatus {
+  HADIR
+  ALFA
+  SAKIT
+  IZIN
+  TERLAMBAT
+}
+
+enum GradeType {
+  ULANGAN_HARIAN
+  UTS
+  UAS
+  TUGAS
+  PRAKTIKUM
+  PROYEK
+}
+
+enum DayOfWeek {
+  SENIN
+  SELASA
+  RABU
+  KAMIS
+  JUMAT
+  SABTU
+}
+
+enum PaymentType {
+  SPP
+  PENDAFTARAN
+  SERAGAM
+  BUKU
+  KEGIATAN
+  LAINNYA
+}
+
+enum PaymentStatus {
+  BELUM_BAYAR
+  LUNAS
+  CICILAN
+  TERLAMBAT
+}
+
+enum MessageType {
+  UMUM
+  AKADEMIK
+  KEHADIRAN
+  PEMBAYARAN
+  DARURAT
+}
+
+// ==================== MULTI-SCHOOL ====================
+
+model Institution {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  phone     String?
+  email     String?
+  logo      String?
+  schools   School[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model School {
+  id          String    @id @default(cuid())
+  name        String
+  level       SchoolLevel
+  address     String?
+  phone       String?
+  npsn        String?   @unique
+
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+
+  classes         Class[]
+  schoolUsers     SchoolUser[]
+  academicYears   AcademicYear[]
+  subjects        Subject[]
+  paymentSettings PaymentSetting[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([institutionId])
+}
+
+// ==================== USER & ROLES ====================
+
+model User {
+  id           String    @id @default(cuid())
+  supabaseId   String    @unique
+  email        String    @unique
+  name         String
+  phone        String?
+  avatar       String?
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  schoolUsers  SchoolUser[]
+  sentMessages Message[]    @relation("PengirimPesan")
+
+  @@index([supabaseId])
+}
+
+model SchoolUser {
+  id     String   @id @default(cuid())
+  role   UserRole
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  homeClasses       Class[]        @relation("WaliKelas")
+  taughtSubjects    ClassSubject[]
+  attendanceRecords Attendance[]   @relation("PencatatAbsensi")
+  createdAt         DateTime       @default(now())
+
+  @@unique([userId, schoolId])
+  @@index([schoolId])
+}
+
+// ==================== AKADEMIK ====================
+
+model AcademicYear {
+  id        String   @id @default(cuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id])
+
+  semesters Semester[]
+  createdAt DateTime @default(now())
+
+  @@unique([schoolId, name])
+  @@index([schoolId, isActive])
+}
+
+model Semester {
+  id        String   @id @default(cuid())
+  name      String
+  number    Int
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  grades      Grade[]
+  attendances Attendance[]
+
+  @@unique([academicYearId, number])
+}
+
+model Subject {
+  id          String @id @default(cuid())
+  code        String
+  name        String
+  description String?
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  classSubjects ClassSubject[]
+  schedules     Schedule[]
+  grades        Grade[]
+  createdAt     DateTime @default(now())
+
+  @@unique([schoolId, code])
+}
+
+// ==================== KELAS ====================
+
+model Class {
+  id    String  @id @default(cuid())
+  name  String
+  grade Int
+  major String?
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  homeroomTeacherId String?
+  homeroomTeacher   SchoolUser? @relation("WaliKelas", fields: [homeroomTeacherId], references: [id])
+
+  students  Student[]
+  subjects  ClassSubject[]
+  schedules Schedule[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([schoolId, name, grade])
+  @@index([schoolId, grade])
+}
+
+model ClassSubject {
+  id String @id @default(cuid())
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id])
+
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  teacherId String
+  teacher   SchoolUser @relation(fields: [teacherId], references: [id])
+
+  @@unique([classId, subjectId])
+}
+
+// ==================== SISWA ====================
+
+model Student {
+  id         String        @id @default(cuid())
+  nis        String
+  nisn       String?
+  name       String
+  gender     Gender
+  birthPlace String?
+  birthDate  DateTime?
+  religion   String?
+  address    String?
+  phone      String?
+  photo      String?
+  enrollDate DateTime      @default(now())
+  status     StudentStatus @default(AKTIF)
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id])
+
+  attendances    Attendance[]
+  grades         Grade[]
+  payments       Payment[]
+  parentContacts ParentContact[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([classId, nis])
+  @@index([classId])
+  @@index([status])
+  @@index([name])
+}
+
+// ==================== ABSENSI ====================
+
+model Attendance {
+  id     String           @id @default(cuid())
+  date   DateTime         @db.Date
+  status AttendanceStatus
+  notes  String?
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  semesterId String
+  semester   Semester @relation(fields: [semesterId], references: [id])
+
+  recordedById String
+  recordedBy   SchoolUser @relation("PencatatAbsensi", fields: [recordedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, date])
+  @@index([date])
+  @@index([studentId, semesterId])
+}
+
+// ==================== NILAI ====================
+
+model Grade {
+  id          String    @id @default(cuid())
+  type        GradeType
+  score       Float
+  maxScore    Float     @default(100)
+  weight      Float     @default(1)
+  description String?
+  date        DateTime  @default(now())
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  semesterId String
+  semester   Semester @relation(fields: [semesterId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId, subjectId, semesterId])
+  @@index([type])
+}
+
+// ==================== JADWAL ====================
+
+model Schedule {
+  id        String    @id @default(cuid())
+  dayOfWeek DayOfWeek
+  startTime String
+  endTime   String
+  room      String?
+
+  classId String
+  class   Class  @relation(fields: [classId], references: [id])
+
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([classId, dayOfWeek])
+}
+
+// ==================== PEMBAYARAN ====================
+
+model PaymentSetting {
+  id     String      @id @default(cuid())
+  type   PaymentType
+  amount Float
+
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  @@unique([schoolId, type])
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  amount    Float
+  month     Int
+  year      Int
+  type      PaymentType
+  status    PaymentStatus @default(BELUM_BAYAR)
+  paidAt    DateTime?
+  receiptNo String?       @unique
+  notes     String?
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, month, year, type])
+  @@index([status])
+  @@index([studentId, year])
+}
+
+// ==================== KOMUNIKASI ====================
+
+model ParentContact {
+  id       String  @id @default(cuid())
+  name     String
+  relation String
+  phone    String
+  email    String?
+  address  String?
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  messages  Message[] @relation("PenerimaPesan")
+  createdAt DateTime  @default(now())
+
+  @@index([studentId])
+}
+
+model Message {
+  id      String      @id @default(cuid())
+  subject String
+  content String
+  type    MessageType @default(UMUM)
+  isRead  Boolean     @default(false)
+  readAt  DateTime?
+
+  senderId String
+  sender   User   @relation("PengirimPesan", fields: [senderId], references: [id])
+
+  recipientId String
+  recipient   ParentContact @relation("PenerimaPesan", fields: [recipientId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([recipientId, isRead])
+  @@index([senderId])
+}

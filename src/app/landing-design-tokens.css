@@ -1,0 +1,163 @@
+/**
+ * UI UX Pro Max Design Tokens Enhancement
+ * Academic Professional Theme for Muadalah
+ * Add this to your tailwind.config.ts or use as CSS variables
+ */
+
+:root {
+  /* UI UX Pro Max - Landing Page Theme */
+  --color-academic-navy: #1E3A5F;
+  --color-academic-navy-600: #172E4D;
+  --color-academic-navy-700: #11223B;
+  
+  --color-professional-blue: #2563EB;
+  --color-professional-blue-600: #1D4ED8;
+  --color-professional-blue-700: #1E40AF;
+  
+  --color-gold-accent: #A16207;
+  --color-gold-accent-600: #854D0E;
+  --color-gold-accent-700: #713F12;
+  
+  /* Light Theme - Enhanced Surface Colors */
+  --surface-bright: #FFFFFF;
+  --surface-default: #F8FAFC;
+  --surface-muted: #E9EEF5;
+  --surface-subtle: #CBD5E1;
+  
+  /* Text Colors */
+  --text-default: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  
+  /* Semantic Colors */
+  --color-success: #059669;
+  --color-warning: #F59E0B;
+  --color-error: #DC2626;
+  --color-info: #2563EB;
+  
+  /* Trust Palette */
+  --color-trust-primary: #1E3A5F;
+  --color-trust-secondary: #2563EB;
+  --color-trust-accent: #A16207;
+  
+  /* Shadow Definitions */
+  --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-soft-lg: 0 10px 15px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.03);
+  --shadow-trust: 0 8px 16px rgba(30, 58, 95, 0.1);
+  --shadow-trust-lg: 0 16px 32px rgba(30, 58, 95, 0.15);
+}
+
+/* Animation Definitions */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scroll-snap-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Typography Classes */
+.font-display {
+  font-family: 'EB Garamond', serif;
+  font-size: 3.75rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.font-h1 {
+  font-family: 'EB Garamond', serif;
+  font-size: 3rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+.font-h2 {
+  font-family: 'EB Garamond', serif;
+  font-size: 2.25rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.font-h3 {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.875rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.font-body-lg {
+  font-family: 'Crimson Text', serif;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.font-body {
+  font-family: 'Crimson Text', serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.font-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* Component Utilities */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  box-shadow: var(--shadow-soft-lg);
+  transform: translateY(-2px);
+}
+
+.cta-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-trust-lg);
+}
+
+.cta-button:active {
+  transform: translateY(0);
+}
+
+.focus-ring {
+  outline: 3px solid var(--color-professional-blue);
+  outline-offset: 2px;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
